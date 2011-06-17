@@ -87,6 +87,9 @@ function registerWindowEventListeners(windowId) {
 	// When registering: autofocus!
 	url_input.focus();
 
+	bindShortcuts(url_input);
+	bindShortcuts(go_button);
+
 	// When URL input text box is selected, change "Refresh" button to "Go" button and remove loaded state
 	url_input.focusin(function() {
 		url_input.removeClass('loaded');
@@ -145,6 +148,85 @@ function registerWindowEventListeners(windowId) {
 }
 
 /**
+ * Bind Shortcuts
+ *
+ * Bind keyboard shortcuts to an object
+ *
+ * @param {Object} object to bind events to
+ */
+function bindShortcuts(obj) {
+	$(obj).bind('keydown', 'ctrl+l', function() {
+		var url_input = $('#window_' + selectedId() + ' .url_input');
+		url_input.focus();
+	});
+	$(obj).bind('keydown', 'ctrl+q', function() {
+		window.exit();
+	});
+	$(obj).bind('keydown', 'ctrl+t', function() {
+		newTab();
+	});
+	$(obj).bind('keydown', 'ctrl+w', function() {
+		closeTab(selectedId());
+	});
+	$(obj).bind('keydown', 'ctrl+0', function() {
+		activateHomeScreen();
+	});
+	$(obj).bind('keydown', 'ctrl+1', function() {
+		if($(".window").length >= 1) {
+			var tab = $(".tab").eq(0);
+			selectTab(tab.attr('id').substring(4));
+		}
+	});
+	$(obj).bind('keydown', 'ctrl+2', function() {
+		if($(".window").length >= 2) {
+			var tab = $(".tab").eq(1);
+			selectTab(tab.attr('id').substring(4));
+		}
+	});
+	$(obj).bind('keydown', 'ctrl+3', function() {
+		if($(".window").length >= 3) {
+			var tab = $(".tab").eq(2);
+			selectTab(tab.attr('id').substring(4));
+		}
+	});
+	$(obj).bind('keydown', 'ctrl+4', function() {
+		if($(".window").length >= 4) {
+			var tab = $(".tab").eq(3);
+			selectTab(tab.attr('id').substring(4));
+		}
+	});
+	$(obj).bind('keydown', 'ctrl+5', function() {
+		if($(".window").length >= 5) {
+			var tab = $(".tab").eq(4);
+			selectTab(tab.attr('id').substring(4));
+		}
+	});
+	$(obj).bind('keydown', 'ctrl+6', function() {
+		if($(".window").length >= 6) {
+			var tab = $(".tab").eq(5);
+			selectTab(tab.attr('id').substring(4));
+		}
+	});
+	$(obj).bind('keydown', 'ctrl+7', function() {
+		if($(".window").length >= 7) {
+			var tab = $(".tab").eq(6);
+			selectTab(tab.attr('id').substring(4));
+		}
+	});
+	$(obj).bind('keydown', 'ctrl+8', function() {
+		if($(".window").length >= 8) {
+			var tab = $(".tab").eq(7);
+			selectTab(tab.attr('id').substring(4));
+		}
+	});
+	$(obj).bind('keydown', 'ctrl+9', function() {
+		if($(".window").length > 0) {
+			selectTab($(".tab").last().attr('id').substring(4));
+		}
+	});
+}
+
+/**
  * Attach iFrame Progress Monitor
  *
  * Attach progress monitor to react to page load progress.
@@ -199,14 +281,21 @@ function attachIframeProgressMonitor(windowId) {
 		$('#window_' + windowId + ' .go_button').attr("src", "refresh.png");				
 	});
 
-	
 	// When title changes...
 	progressMonitor.on('title-change', function(document_title) {
 		if(document_title) {
 			$('#window_' + windowId + ' .document_title').addClass("active").text(document_title);	
 		}
 	});
-	
+}
+
+/**
+ * Selected Id
+ *
+ * Should return the window id of the currently selected tab
+ */
+function selectedId() {
+	return $("#windows .selected").attr("id").substring(8);
 }
 
 /**
@@ -224,7 +313,6 @@ function selectTab(windowId) {
 	$("#windows .selected, #tabs .selected").removeClass("selected");
 	$("#window_" + windowId).addClass("selected");
 	$("#tab_" + windowId).addClass("selected");
-
 }
 
 /**
@@ -391,6 +479,7 @@ function activateWindows() {
 	$("#tabs").removeClass("detached");
 }
 
+
 // When Shell starts up...
 $(document).ready(function() {
 
@@ -417,7 +506,7 @@ $(document).ready(function() {
 	$("#home_button").click(function() {
 		activateHomeScreen();
 	});
-	
+
 	// Select tab
 	$(".tab").live('click', function () {
 		selectTab($(this).attr("id").substring(4));
@@ -439,6 +528,8 @@ $(document).ready(function() {
 		enteredTab = undefined;
 	});
 	
+	bindShortcuts(document);
+
 	// Wait for MS Windows to catch up, then toggle full screen mode
 	setTimeout(function(){
 		fullscreen.toggle(window)
