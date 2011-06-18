@@ -30,6 +30,7 @@ currentUrlIndex = 0, // Index of current point in URL history
 clockElement,
 selectedDownTab,
 enteredTab;
+var debug = 0;
 
 /**
  * Clock
@@ -156,8 +157,9 @@ function registerWindowEventListeners(windowId) {
  */
 function bindShortcuts(obj) {
 	$(obj).bind('keydown', 'ctrl+l', function() {
-		var url_input = $('#window_' + selectedId() + ' .url_input');
-		url_input.focus();
+		if ($("#windows .selected").length > 0) {
+			$('#window_' + selectedId() + ' .url_input').focus();
+		}
 	});
 	$(obj).bind('keydown', 'ctrl+q', function() {
 		window.exit();
@@ -166,7 +168,9 @@ function bindShortcuts(obj) {
 		newTab();
 	});
 	$(obj).bind('keydown', 'ctrl+w', function() {
-		closeTab(selectedId());
+		if ($("#windows .selected").length > 0) {
+			closeTab(selectedId());
+		}
 	});
 	$(obj).bind('keydown', 'ctrl+0', function() {
 		activateHomeScreen();
@@ -295,7 +299,7 @@ function attachIframeProgressMonitor(windowId) {
  * Should return the window id of the currently selected tab
  */
 function selectedId() {
-	return $("#windows .selected").attr("id").substring(8);
+	return $("#windows .selected").attr("id").substring(7);
 }
 
 /**
@@ -355,6 +359,9 @@ function newTab(url) {
 		$("#windows .selected .url_input").val(url);
 		navigate(windowId);
 	}
+	if (debug) {
+		console.log("New tab " + windowId);
+	}
 }
 
 /** 
@@ -366,6 +373,9 @@ function newTab(url) {
  */
 function closeTab(windowId) {
 	// Remove selected window & corresponding tab
+	if (debug) {
+		console.log("Close tab " + windowId);
+	}
 	$("#window_" + windowId).remove();
 	$("#tab_" + windowId).remove();
 
