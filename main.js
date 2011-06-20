@@ -15,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Webian Shell in the LICENSE file. If not, see 
+ * along with Webian Shell in the LICENSE file. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 // Global variables
@@ -33,7 +33,7 @@ var debug = 0;
 
 /**
  * Clock
- * 
+ *
  * Updates the time on the clock when called
  */
 function clock() {
@@ -56,10 +56,10 @@ function clock() {
 
 /**
  * Make iFrame
- * 
+ *
  * Creates a special iFrame which acts like a browser and will contain the
  * content of a new window.
- * 
+ *
  * @return new iFrame object
  */
 function makeIframe(windowId) {
@@ -99,11 +99,11 @@ function forward(windowId) {
 
 /**
  * Register Window Event Listeners
- * 
+ *
  * Registers event listeners for the currently selected window to detect
  * user actions like go, back forward etc. and attaches progress monitor to
  * iFrame.
- * 
+ *
  * @param {String} windowId of window to register listeners for
  */
 function registerWindowEventListeners(windowId) {
@@ -131,11 +131,11 @@ function registerWindowEventListeners(windowId) {
 	});
 
 	// Go/Stop/Refresh (Submit URL form or click go button)
-	$("#window_" + windowId + " .url_form").submit(function() { 
+	$("#window_" + windowId + " .url_form").submit(function() {
 		navigate($(this).parents(".window").attr("id").substring(7));
-		return false; 
+		return false;
 	});
-	go_button.click(function() { 
+	go_button.click(function() {
 		// If loading then act as stop button
 		if($('#windows .selected .url_input').hasClass('loading')) {
 			var window_iframe = $("#windows .selected .window_iframe")[0];
@@ -249,17 +249,17 @@ function bindShortcuts(obj) {
  * Attach iFrame Progress Monitor
  *
  * Attach progress monitor to react to page load progress.
- * 
+ *
  * @param {String} windowId of window containing iFrame to listen to
  */
 function attachIframeProgressMonitor(windowId) {
 	var progressMonitor = web_content.ProgressMonitor(),
 		window_iframe = $('#window_' + windowId + ' .window_iframe'),
 		url_input = $('#window_' + windowId + ' .url_input');
-	
+
 	// Add progress monitor to iFrame...
 	progressMonitor.attach(window_iframe[0]);
-	
+
 	// Check progress of page load...
 	progressMonitor.on('progress', function(percent) {
 		$(url_input).addClass('loading');
@@ -283,13 +283,13 @@ function attachIframeProgressMonitor(windowId) {
 					urlHistory[windowId][0] + 1,
 					urlHistory[windowId].length - urlHistory[windowId][0]);
 			}
-			
+
 			// Add new URL to history
 			urlHistory[windowId].push(url);
-			
+
 			// Update index
 			urlHistory[windowId][0]++;
-		}			
+		}
 	});
 
 	// When page and contents are completely loaded...
@@ -297,7 +297,7 @@ function attachIframeProgressMonitor(windowId) {
 		// Set URL input textbox to loaded state
 		$(url_input).removeClass('loading').addClass('loaded');
 		// Change "Go" button to "Refresh"
-		$('#window_' + windowId + ' .go_button').attr("src", "refresh.png");	
+		$('#window_' + windowId + ' .go_button').attr("src", "refresh.png");
 		// Update favicon
 		faviconUpdate(windowId);
 		// Check for background-color
@@ -309,7 +309,7 @@ function attachIframeProgressMonitor(windowId) {
 	// When title changes...
 	progressMonitor.on('title-change', function(document_title) {
 		if(document_title) {
-			$('#window_' + windowId + ' .document_title').addClass("active").text(document_title);	
+			$('#window_' + windowId + ' .document_title').addClass("active").text(document_title);
 		}
 	});
 }
@@ -325,7 +325,7 @@ function selectedId() {
 
 /**
  * Select Tab
- * 
+ *
  * Select a tab and its corresponding window
  *
  * @param {String} windowId of tab to be selected
@@ -334,7 +334,7 @@ function selectTab(windowId) {
 	// Activate windows container if not already active
 	if (!$("#windows").hasClass("active")) {
 		activateWindows();
-	} 
+	}
 	$("#windows .selected, #tabs .selected").removeClass("selected");
 	$("#window_" + windowId).addClass("selected");
 	$("#tab_" + windowId).addClass("selected");
@@ -342,7 +342,7 @@ function selectTab(windowId) {
 
 /**
  * New Tab
- * 
+ *
  * Creates a new tab & corresponding window and selects that tab
  */
 function newTab(url) {
@@ -364,13 +364,13 @@ function newTab(url) {
 	// Add a new iFrame to new window
 	var newIframe = makeIframe(windowId);
 	$("#windows .selected .window_toolbar").after(newIframe);
-	
+
 	// Register window event listeners
 	registerWindowEventListeners(windowId);
-	
+
 	// Attach iFrame progress monitor
 	attachIframeProgressMonitor(windowId);
-	
+
 	// Create history array for window, using first element as index
 	urlHistory[windowId] = [];
 	urlHistory[windowId][0] = 0;
@@ -385,17 +385,17 @@ function newTab(url) {
 	}
 }
 
-/** 
+/**
  * Close Tab
- * 
+ *
  * Closes tab & window corresponding to provided windowId
- * 
+ *
  * @param {String} windowId
  */
 function closeTab(windowId) {
 	if(!windowId)
 		windowId = $("#windows .selected").attr("id").substring(7);
-	
+
 	// Remove selected window & corresponding tab
 	if (debug) {
 		console.log("Close tab " + windowId);
@@ -412,30 +412,30 @@ function closeTab(windowId) {
 		var newLastWindowId = $(".window:not(#window_template)").last().attr("id").substring(7);
 		selectTab(newLastWindowId);
 	}
-	
+
 	// Remove browsing history for tab
 	urlHistory.splice(windowId, 1);
 }
 
 /**
  * Navigate
- * 
+ *
  * Sets the src attribute of the iFrame belonging to the window specified by
  * windowId in order to navigate to a resource identified by the URI in the
  * address bar of that window. Also fetches favicon for the resource.
- * 
+ *
  * @param windowId of window to use
  */
 function navigate(windowId) {
 	// invoked when the user hits the go button or hits enter in url box
 	var address = url.guess($.trim($("#windows .selected .url_input").val()));
-	// trigger navigation        
+	// trigger navigation
 	$("#windows .selected .window_iframe").attr("src", address);
 }
 
 /**
  * Activate Home Screen
- * 
+ *
  * Hides all windows and shows the home screen
  */
 function activateHomeScreen() {
@@ -465,14 +465,14 @@ function faviconUpdate(windowId, address){
 /**
  * Switches element 1 and element 2 in the parent tree.
  * It assumes element 1 and element 2 ARE on the same level in the parent tree.
- * 
+ *
  * @param elem1 First element
  * @param elem2 Second element
  */
 function switchElements(elem1, elem2){
 	// Init vars
 	var small, big, bigFollow;
-	
+
 	// Order elements on index
 	if(elem1.index() < elem2.index()){
 		small = elem1;
@@ -482,14 +482,14 @@ function switchElements(elem1, elem2){
 		big = elem1;
 	}
 	bigFollow = big.next();
-	
+
 	// Move the bigger index element
 	big.insertBefore(small);
 	if(big.index() - small.index() === 1){
 		// Only need to do an insert before --we be done!
 		return;
 	}
-	
+
 	// Move the smaller index element
 	if(bigFollow.length === 0){
 		// append rather than insertBefore
@@ -501,7 +501,7 @@ function switchElements(elem1, elem2){
 
 /**
  * Activate Windows
- * 
+ *
  * Hides the home screen and makes the windows container active
  */
 function activateWindows() {
@@ -534,21 +534,56 @@ function getCurrentWindowId() {
 function registerKeyboardShortcuts() {
 	// New tab
 	hotkey.register("accel-t", function(){
-		newTab();		
+		newTab();
 	});
-	
+
 	// Close tab
 	hotkey.register("accel-w", function(){
 		if($("#windows").hasClass("active")) {
 			closeTab();
 		}
 	});
-	
+
 	// Go to location bar
 	hotkey.register("accel-l", function(){
 		if($("#windows").hasClass("active")) {
 			$("#windows .selected .url_input")[0].select();	
 		}	
+	});
+
+	// Navigation
+	hotkey.register("accel-0", function(){
+		activateHomeScreen();
+	});
+	hotkey.register("accel-1", function() {
+		if($(".window").length >= 1) {
+			var tab = $(".tab").eq(0);
+			selectTab(tab.attr("id").substring(4));
+		}
+	});
+	hotkey.register("accel-2", function() {
+		if($(".window").length >= 2) {
+			var tab = $(".tab").eq(1);
+			selectTab(tab.attr("id").substring(4));
+		}
+	});
+	hotkey.register("accel-3", function() {
+		if($(".window").length >= 3) {
+			var tab = $(".tab").eq(2);
+			selectTab(tab.attr("id").substring(4));
+		}
+	});
+	hotkey.register("accel-4", function() {
+		if($(".window").length >= 4) {
+			var tab = $(".tab").eq(3);
+			selectTab(tab.attr("id").substring(4));
+		}
+	});
+	hotkey.register("accel-5", function() {
+		if($(".window").length >= 5) {
+			var tab = $(".tab").eq(4);
+			selectTab(tab.attr("id").substring(4));
+		}
 	});
 	
 	// Refresh
@@ -579,7 +614,7 @@ $(document).ready(function() {
 	// Get clock, once and for all
 	clockElement = $('#clock');
 
-	// Set clock to be updated every second	
+	// Set clock to be updated every second
 	self.setInterval(clock, 1000);
 
 	// Create first tab
@@ -599,12 +634,12 @@ $(document).ready(function() {
 	$("#home_button").click(function() {
 		activateHomeScreen();
 	});
-	
+
 	// Stop homescreen background from being draggable
 	$("#home_screen #widget_space").mousedown(function(e){
 		e.preventDefault();
 	});
-	
+
 	// Select tab
 	$(".tab").live('click', function () {
 		selectTab($(this).attr("id").substring(4));
@@ -613,25 +648,25 @@ $(document).ready(function() {
 	}).live('hover', function(){
 		if(selectedDownTab !== undefined && $(this).index() !== selectedDownTab.index()){
 			enteredTab = $(this);
-			
+
 			// Switch the two tabs position
 			switchElements(selectedDownTab, enteredTab);
-			
+
 			// Un-init our variables
 			selectedDownTab = undefined;
 			enteredTab = undefined;
-		} 
+		}
 	}).live('mouseup', function(){
 		selectedDownTab = undefined;
 		enteredTab = undefined;
 	});
-	
+
 	// Register keyboard shortcuts
 	registerKeyboardShortcuts();
-	
+
 	// Wait for MS Windows to catch up, then toggle full screen mode
 	setTimeout(function(){
 		fullscreen.toggle(window)
 	}, 2000);
-	
+
 });
