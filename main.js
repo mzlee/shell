@@ -555,34 +555,57 @@ function registerKeyboardShortcuts() {
 	hotkey.register("accel-0", function(){
 		activateHomeScreen();
 	});
-	hotkey.register("accel-1", function() {
+	hotkey.register("accel-1", function(){
 		if($(".window").length >= 1) {
 			var tab = $(".tab").eq(0);
 			selectTab(tab.attr("id").substring(4));
 		}
 	});
-	hotkey.register("accel-2", function() {
+	hotkey.register("accel-2", function(){
 		if($(".window").length >= 2) {
 			var tab = $(".tab").eq(1);
 			selectTab(tab.attr("id").substring(4));
 		}
 	});
-	hotkey.register("accel-3", function() {
+	hotkey.register("accel-3", function(){
 		if($(".window").length >= 3) {
 			var tab = $(".tab").eq(2);
 			selectTab(tab.attr("id").substring(4));
 		}
 	});
-	hotkey.register("accel-4", function() {
+	hotkey.register("accel-4", function(){
 		if($(".window").length >= 4) {
 			var tab = $(".tab").eq(3);
 			selectTab(tab.attr("id").substring(4));
 		}
 	});
-	hotkey.register("accel-5", function() {
+	hotkey.register("accel-5", function(){
 		if($(".window").length >= 5) {
 			var tab = $(".tab").eq(4);
 			selectTab(tab.attr("id").substring(4));
+		}
+	});
+	hotkey.register("accel-6", function(){
+		if($(".window").length >= 6) {
+			var tab = $(".tab").eq(5);
+			selectTab(tab.attr("id").substring(4));
+		}
+	});
+	hotkey.register("accel-7", function(){
+		if($(".window").length >= 7) {
+			var tab = $(".tab").eq(6);
+			selectTab(tab.attr("id").substring(4));
+		}
+	});
+	hotkey.register("accel-8", function(){
+		if($(".window").length >= 8) {
+			var tab = $(".tab").eq(7);
+			selectTab(tab.attr("id").substring(4));
+		}
+	});
+	hotkey.register("accel-9", function(){
+		if($(".window").length > 0) {
+			selectTab($(".tab").last().attr("id").substring(4));
 		}
 	});
 	
@@ -604,8 +627,6 @@ function registerKeyboardShortcuts() {
 	hotkey.register("accel-vk_right", function() {
 		if($("#windows").hasClass("active")) {
 			forward(getCurrentWindowId());
-		}
-	});
 }
 
 // When Shell starts up...
