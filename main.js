@@ -22,6 +22,7 @@
  */
 // Global variables
 var favicon = require("favicon"),
+hotkey = require("hotkey"),
 web_content = require("web-content"),
 url = require("url"),
 fullscreen = require("fullscreen"),
@@ -88,9 +89,6 @@ function registerWindowEventListeners(windowId) {
 	// When registering: autofocus!
 	url_input.focus();
 
-	bindShortcuts(url_input);
-	bindShortcuts(go_button);
-
 	// When URL input text box is selected, change "Refresh" button to "Go" button and remove loaded state
 	url_input.focusin(function() {
 		url_input.removeClass('loaded');
@@ -127,9 +125,6 @@ function registerWindowEventListeners(windowId) {
 		if (urlHistory[windowId][0] < 2) return;
 		$("#windows .selected .window_iframe").attr("src", urlHistory[windowId][--urlHistory[windowId][0]]);
 		urlHistory[windowId][0] = urlHistory[windowId][0];
-		
-		// Update favicon
-		faviconUpdate(windowId);
 	});
 
 	// Forward
@@ -137,96 +132,11 @@ function registerWindowEventListeners(windowId) {
 		if(urlHistory[windowId][0] + 1 >= urlHistory[windowId].length) return;
 		$("#windows .selected .window_iframe").attr("src", urlHistory[windowId][++urlHistory[windowId][0]]);
 		urlHistory[windowId][0] = urlHistory[windowId][0];
-		
-		// Update favicon
-		faviconUpdate(windowId);
 	});
 
 	// Close tab
 	$("#window_" + windowId + " .close_button").click(function() {
 		closeTab($(this).parents(".window").attr("id").substring(7));
-	});
-}
-
-/**
- * Bind Shortcuts
- *
- * Bind keyboard shortcuts to an object
- *
- * @param {Object} object to bind events to
- */
-function bindShortcuts(obj) {
-	$(obj).bind('keydown', 'ctrl+l', function() {
-		if ($("#windows .selected").length > 0) {
-			$('#window_' + selectedId() + ' .url_input').focus();
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+q', function() {
-		window.exit();
-	});
-	$(obj).bind('keydown', 'ctrl+t', function() {
-		newTab();
-	});
-	$(obj).bind('keydown', 'ctrl+w', function() {
-		if ($("#windows .selected").length > 0) {
-			closeTab(selectedId());
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+0', function() {
-		activateHomeScreen();
-	});
-	$(obj).bind('keydown', 'ctrl+1', function() {
-		if($(".window").length >= 1) {
-			var tab = $(".tab").eq(0);
-			selectTab(tab.attr('id').substring(4));
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+2', function() {
-		if($(".window").length >= 2) {
-			var tab = $(".tab").eq(1);
-			selectTab(tab.attr('id').substring(4));
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+3', function() {
-		if($(".window").length >= 3) {
-			var tab = $(".tab").eq(2);
-			selectTab(tab.attr('id').substring(4));
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+4', function() {
-		if($(".window").length >= 4) {
-			var tab = $(".tab").eq(3);
-			selectTab(tab.attr('id').substring(4));
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+5', function() {
-		if($(".window").length >= 5) {
-			var tab = $(".tab").eq(4);
-			selectTab(tab.attr('id').substring(4));
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+6', function() {
-		if($(".window").length >= 6) {
-			var tab = $(".tab").eq(5);
-			selectTab(tab.attr('id').substring(4));
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+7', function() {
-		if($(".window").length >= 7) {
-			var tab = $(".tab").eq(6);
-			selectTab(tab.attr('id').substring(4));
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+8', function() {
-		if($(".window").length >= 8) {
-			var tab = $(".tab").eq(7);
-			selectTab(tab.attr('id').substring(4));
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+9', function() {
-		if($(".window").length > 0) {
-			selectTab($(".tab").last().attr('id').substring(4));
-		}
 	});
 }
 
@@ -282,7 +192,13 @@ function attachIframeProgressMonitor(windowId) {
 		// Set URL input textbox to loaded state
 		$(url_input).removeClass('loading').addClass('loaded');
 		// Change "Go" button to "Refresh"
-		$('#window_' + windowId + ' .go_button').attr("src", "refresh.png");				
+		$('#window_' + windowId + ' .go_button').attr("src", "refresh.png");	
+		// Update favicon
+		faviconUpdate(windowId);
+		// Check for background-color
+		if(window_iframe.css('background-color') === 'transparent'){
+			window_iframe.css('background-color', 'white');
+		}
 	});
 
 	// When title changes...
@@ -372,6 +288,9 @@ function newTab(url) {
  * @param {String} windowId
  */
 function closeTab(windowId) {
+	if(!windowId)
+		windowId = $("#windows .selected").attr("id").substring(7);
+	
 	// Remove selected window & corresponding tab
 	if (debug) {
 		console.log("Close tab " + windowId);
@@ -407,8 +326,6 @@ function navigate(windowId) {
 	var address = url.guess($.trim($("#windows .selected .url_input").val()));
 	// trigger navigation        
 	$("#windows .selected .window_iframe").attr("src", address);
-	// Fetch favicon for window
-	faviconUpdate(windowId, address);	
 }
 
 /**
@@ -489,6 +406,94 @@ function activateWindows() {
 	$("#tabs").removeClass("detached");
 }
 
+/**
+ * Register Keyboard Shortcuts
+ *
+ * Registers keyboard shortcuts for new tab, close tab and location bar focus
+ */
+function registerKeyboardShortcuts() {
+	// New tab
+	hotkey.register("accel-t", function(){
+		newTab();		
+	});
+	
+	// Close tab
+	hotkey.register("accel-w", function(){
+		if($("#windows").hasClass("active")) {
+			closeTab();
+		}
+	});
+	
+	// Go to location bar
+	hotkey.register("accel-l", function(){
+		if($("#windows").hasClass("active")) {
+			$("#windows .selected .url_input")[0].select();	
+		}
+	});
+
+	// Navigation
+	hotkey.register("accel-0", function(){
+		activateHomeScreen();
+	});
+	hotkey.register("accel-1", function() {
+		if($(".window").length >= 1) {
+			var tab = $(".tab").eq(0);
+			selectTab(tab.attr("id").substring(4));
+		}
+	});
+	hotkey.register("accel-2", function() {
+		if($(".window").length >= 2) {
+			var tab = $(".tab").eq(1);
+			selectTab(tab.attr("id").substring(4));
+		}
+	});
+	hotkey.register("accel-3", function() {
+		if($(".window").length >= 3) {
+			var tab = $(".tab").eq(2);
+			selectTab(tab.attr("id").substring(4));
+		}
+	});
+	hotkey.register("accel-4", function() {
+		if($(".window").length >= 4) {
+			var tab = $(".tab").eq(3);
+			selectTab(tab.attr("id").substring(4));
+		}
+	});
+	hotkey.register("accel-5", function() {
+		if($(".window").length >= 5) {
+			var tab = $(".tab").eq(4);
+			selectTab(tab.attr("id").substring(4));
+		}
+	});
+	hotkey.register("accel-6", function() {
+		if($(".window").length >= 6) {
+			var tab = $(".tab").eq(5);
+			selectTab(tab.attr("id").substring(4));
+		}
+	});
+	hotkey.register("accel-7", function() {
+		if($(".window").length >= 7) {
+			var tab = $(".tab").eq(6);
+			selectTab(tab.attr("id").substring(4));
+		}
+	});
+	hotkey.register("accel-8", function() {
+		if($(".window").length >= 8) {
+			var tab = $(".tab").eq(7);
+			selectTab(tab.attr("id").substring(4));
+		}
+	});
+	hotkey.register("accel-9", function() {
+		if($(".window").length > 0) {
+			selectTab($(".tab").last().attr("id").substring(4));
+		}
+	});
+
+	// Shutdown?
+	hotkey.register("accel-q", function(){
+		window.exit();
+	});
+}
 
 // When Shell starts up...
 $(document).ready(function() {
@@ -516,7 +521,12 @@ $(document).ready(function() {
 	$("#home_button").click(function() {
 		activateHomeScreen();
 	});
-
+	
+	// Stop homescreen background from being draggable
+	$("#home_screen #widget_space").mousedown(function(e){
+		e.preventDefault();
+	});
+	
 	// Select tab
 	$(".tab").live('click', function () {
 		selectTab($(this).attr("id").substring(4));
@@ -538,10 +548,12 @@ $(document).ready(function() {
 		enteredTab = undefined;
 	});
 	
-	bindShortcuts(document);
-
+	// Register keyboard shortcuts
+	registerKeyboardShortcuts();
+	
 	// Wait for MS Windows to catch up, then toggle full screen mode
 	setTimeout(function(){
 		fullscreen.toggle(window)
 	}, 2000);
+	
 });
