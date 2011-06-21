@@ -351,10 +351,12 @@ function faviconUpdate(windowId, address){
 	if(address === undefined){
 		address = url.guess($.trim($("#windows .selected .url_input").val()));
 	}
-	// Fetch favicon for window
-	favicon.fetch(address, function(faviconUrl) {
-		$("#tab_" + windowId + " img").attr('src', faviconUrl);
-	});
+	if (address) {
+		// Fetch favicon for window
+		favicon.fetch(address, function(faviconUrl) {
+			$("#tab_" + windowId + " img").attr('src', faviconUrl);
+		});
+	}
 }
 
 /**
@@ -421,6 +423,8 @@ function registerKeyboardShortcuts() {
 	hotkey.register("accel-w", function(){
 		if($("#windows").hasClass("active")) {
 			closeTab();
+		} else if ($("#windows").length == 1) {
+			window.exit();
 		}
 	});
 
