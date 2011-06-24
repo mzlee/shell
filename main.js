@@ -28,8 +28,8 @@ urlHistory = [], // History of URLs
 currentUrlIndex = 0, // Index of current point in URL history
 clockElement,
 selectedDownTab,
-enteredTab;
-var debug = 0;
+enteredTab,
+globalShift = false;
 
 /**
  * Clock
@@ -68,6 +68,15 @@ function makeIframe(windowId) {
 		"privilege": "content",
 		"class": "window_iframe"
 	});
+	$(iFrame).bind("load", function () {
+	      var address = url.guess($.trim($("#windows .selected .url_input").val()));
+	      if (globalShift == true) {
+		 globalShift = false;
+		 newUrl = "" + address;
+		 $("#window_" + selectedId() + " .back_button").click();
+		 var id = "" + newTab(newUrl);
+	      }
+	   });
 	return iFrame;
 }
 
@@ -380,9 +389,6 @@ function newTab(url) {
 		$("#windows .selected .url_input").val(url);
 		navigate(windowId);
 	}
-	if (debug) {
-		console.log("New tab " + windowId);
-	}
 }
 
 /**
@@ -397,9 +403,6 @@ function closeTab(windowId) {
 		windowId = $("#windows .selected").attr("id").substring(7);
 
 	// Remove selected window & corresponding tab
-	if (debug) {
-		console.log("Close tab " + windowId);
-	}
 	$("#window_" + windowId).remove();
 	$("#tab_" + windowId).remove();
 
@@ -631,6 +634,8 @@ function registerKeyboardShortcuts() {
 	hotkey.register("accel-vk_right", function() {
 		if($("#windows").hasClass("active")) {
 			forward(getCurrentWindowId());
+		}
+	});
 }
 
 // When Shell starts up...
