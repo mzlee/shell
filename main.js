@@ -2,9 +2,7 @@
  * Webian Shell browser logic
  * http://webian.org
  * 
- * Copyright @authors 2011
- *
- * @author Ben Francis http://tola.me.uk
+ * Copyright AUTHORS
  * 
  * Webian Shell is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,6 +71,32 @@ function makeIframe(windowId) {
 }
 
 /**
+ * Back
+ *
+ * Navigate to the previous page in browsing history
+ *
+ * @param {String} windowId of window to manipulate
+ */
+function back(windowId) {
+	if (urlHistory[windowId][0] < 2) return;
+	$("#windows .selected .window_iframe").attr("src", urlHistory[windowId][--urlHistory[windowId][0]]);
+	urlHistory[windowId][0] = urlHistory[windowId][0];
+ }
+ 
+ /**
+  * Forward
+  *
+  * Navigate to the next page in browsing history
+  *
+  * @param {String} windowId of window to manipulate
+  */
+function forward(windowId) {
+	if(urlHistory[windowId][0] + 1 >= urlHistory[windowId].length) return;
+	$("#windows .selected .window_iframe").attr("src", urlHistory[windowId][++urlHistory[windowId][0]]);
+	urlHistory[windowId][0] = urlHistory[windowId][0];  	  
+}
+
+/**
  * Register Window Event Listeners
  * 
  * Registers event listeners for the currently selected window to detect
@@ -121,16 +145,12 @@ function registerWindowEventListeners(windowId) {
 
 	// Back
 	$("#window_" + windowId + " .back_button").click(function() {
-		if (urlHistory[windowId][0] < 2) return;
-		$("#windows .selected .window_iframe").attr("src", urlHistory[windowId][--urlHistory[windowId][0]]);
-		urlHistory[windowId][0] = urlHistory[windowId][0];
+		back(windowId);
 	});
 
 	// Forward
 	$("#window_" + windowId + " .forward_button").click(function() {
-		if(urlHistory[windowId][0] + 1 >= urlHistory[windowId].length) return;
-		$("#windows .selected .window_iframe").attr("src", urlHistory[windowId][++urlHistory[windowId][0]]);
-		urlHistory[windowId][0] = urlHistory[windowId][0];
+		forward(windowId);
 	});
 
 	// Close tab
@@ -263,7 +283,7 @@ function newTab(url) {
 	urlHistory[windowId] = [];
 	urlHistory[windowId][0] = 0;
 	
-	// Navigate to URL if provided
+	//Navigate to URL if provided
 	if(url) {
 		$("#windows .selected .url_input").val(url);
 		navigate(windowId);
@@ -394,6 +414,21 @@ function activateWindows() {
 }
 
 /**
+ * Get Window ID
+ *
+ * Get the ID of the currently selected window
+ *
+ * @return ID String excluding "window_" prefix
+ */
+function getCurrentWindowId() {
+	if($("#windows").hasClass("active")) { 
+		return $("#windows .selected").attr("id").substring(7);
+	} else {
+		return false;
+	}
+}
+
+/**
  * Register Keyboard Shortcuts
  *
  * Registers keyboard shortcuts for new tab, close tab and location bar focus
@@ -415,7 +450,7 @@ function registerKeyboardShortcuts() {
 	hotkey.register("accel-l", function(){
 		if($("#windows").hasClass("active")) {
 			$("#windows .selected .url_input")[0].select();	
-		}
+		}	
 	});
 	
 	// Refresh
@@ -423,6 +458,20 @@ function registerKeyboardShortcuts() {
 		if($("#windows").hasClass("active")) {
 			navigate();
 		}	
+	});
+	
+	// Back
+	hotkey.register("accel-vk_left", function() {
+		if($("#windows").hasClass("active")) {
+			back(getCurrentWindowId());
+		}
+	});
+	
+	// Forward
+	hotkey.register("accel-vk_right", function() {
+		if($("#windows").hasClass("active")) {
+			forward(getCurrentWindowId());
+		}
 	});
 }
 
