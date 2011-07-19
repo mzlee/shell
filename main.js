@@ -28,8 +28,7 @@ urlHistory = [], // History of URLs
 currentUrlIndex = 0, // Index of current point in URL history
 clockElement,
 selectedDownTab,
-enteredTab,
-globalShift = false;
+enteredTab;
 
 /**
  * Clock
@@ -68,15 +67,6 @@ function makeIframe(windowId) {
 		"privilege": "content",
 		"class": "window_iframe"
 	});
-	$(iFrame).bind("load", function () {
-	      var address = url.guess($.trim($("#windows .selected .url_input").val()));
-	      if (globalShift == true) {
-		 globalShift = false;
-		 newUrl = "" + address;
-		 $("#window_" + selectedId() + " .back_button").click();
-		 var id = "" + newTab(newUrl);
-	      }
-	   });
 	return iFrame;
 }
 
@@ -122,9 +112,6 @@ function registerWindowEventListeners(windowId) {
 	// When registering: autofocus!
 	url_input.focus();
 
-	bindShortcuts(url_input);
-	bindShortcuts(go_button);
-
 	// When URL input text box is selected, change "Refresh" button to "Go" button and remove loaded state
 	url_input.focusin(function() {
 		url_input.removeClass('loaded');
@@ -169,88 +156,6 @@ function registerWindowEventListeners(windowId) {
 	// Close tab
 	$("#window_" + windowId + " .close_button").click(function() {
 		closeTab($(this).parents(".window").attr("id").substring(7));
-	});
-}
-
-/**
- * Bind Shortcuts
- *
- * Bind keyboard shortcuts to an object
- *
- * @param {Object} object to bind events to
- */
-function bindShortcuts(obj) {
-	$(obj).bind('keydown', 'ctrl+l', function() {
-		if ($("#windows .selected").length > 0) {
-			$('#window_' + selectedId() + ' .url_input').focus();
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+q', function() {
-		window.exit();
-	});
-	$(obj).bind('keydown', 'ctrl+t', function() {
-		newTab();
-	});
-	$(obj).bind('keydown', 'ctrl+w', function() {
-		if ($("#windows .selected").length > 0) {
-			closeTab(selectedId());
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+0', function() {
-		activateHomeScreen();
-	});
-	$(obj).bind('keydown', 'ctrl+1', function() {
-		if($(".window").length >= 1) {
-			var tab = $(".tab").eq(0);
-			selectTab(tab.attr('id').substring(4));
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+2', function() {
-		if($(".window").length >= 2) {
-			var tab = $(".tab").eq(1);
-			selectTab(tab.attr('id').substring(4));
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+3', function() {
-		if($(".window").length >= 3) {
-			var tab = $(".tab").eq(2);
-			selectTab(tab.attr('id').substring(4));
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+4', function() {
-		if($(".window").length >= 4) {
-			var tab = $(".tab").eq(3);
-			selectTab(tab.attr('id').substring(4));
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+5', function() {
-		if($(".window").length >= 5) {
-			var tab = $(".tab").eq(4);
-			selectTab(tab.attr('id').substring(4));
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+6', function() {
-		if($(".window").length >= 6) {
-			var tab = $(".tab").eq(5);
-			selectTab(tab.attr('id').substring(4));
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+7', function() {
-		if($(".window").length >= 7) {
-			var tab = $(".tab").eq(6);
-			selectTab(tab.attr('id').substring(4));
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+8', function() {
-		if($(".window").length >= 8) {
-			var tab = $(".tab").eq(7);
-			selectTab(tab.attr('id').substring(4));
-		}
-	});
-	$(obj).bind('keydown', 'ctrl+9', function() {
-		if($(".window").length > 0) {
-			selectTab($(".tab").last().attr('id').substring(4));
-		}
 	});
 }
 
