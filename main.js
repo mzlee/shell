@@ -2,9 +2,7 @@
  * Webian Shell browser logic
  * http://webian.org
  *
- * Copyright @authors 2011
- *
- * @author Ben Francis http://tola.me.uk
+ * Copyright AUTHORS
  *
  * Webian Shell is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +27,8 @@ fullscreen = require("fullscreen"),
 urlHistory = [], // History of URLs
 clockElement,
 selectedDownTab,
-enteredTab;
-var debug = 0;
+enteredTab,
+globalShift = false;
 
 /**
  * Clock
@@ -69,7 +67,42 @@ function makeIframe(windowId) {
 		"privilege": "content",
 		"class": "window_iframe"
 	});
+	$(iFrame).bind("load", function () {
+	      var address = url.guess($.trim($("#windows .selected .url_input").val()));
+	      if (globalShift == true) {
+		 globalShift = false;
+		 newUrl = "" + address;
+		 $("#window_" + selectedId() + " .back_button").click();
+		 var id = "" + newTab(newUrl);
+	      }
+	   });
 	return iFrame;
+}
+
+/**
+ * Back
+ *
+ * Navigate to the previous page in browsing history
+ *
+ * @param {String} windowId of window to manipulate
+ */
+function back(windowId) {
+	if (urlHistory[windowId][0] < 2) return;
+	$("#windows .selected .window_iframe").attr("src", urlHistory[windowId][--urlHistory[windowId][0]]);
+	urlHistory[windowId][0] = urlHistory[windowId][0];
+ }
+
+/**
+ * Forward
+ *
+ * Navigate to the next page in browsing history
+ *
+ * @param {String} windowId of window to manipulate
+ */
+function forward(windowId) {
+	if(urlHistory[windowId][0] + 1 >= urlHistory[windowId].length) return;
+	$("#windows .selected .window_iframe").attr("src", urlHistory[windowId][++urlHistory[windowId][0]]);
+	urlHistory[windowId][0] = urlHistory[windowId][0];
 }
 
 /**
@@ -128,16 +161,12 @@ function registerWindowEventListeners(windowId) {
 
 	// Back
 	$("#window_" + windowId + " .back_button").click(function() {
-		if (urlHistory[windowId][0] < 2) return;
-		$("#windows .selected .window_iframe").attr("src", urlHistory[windowId][--urlHistory[windowId][0]]);
-		urlHistory[windowId][0] = urlHistory[windowId][0];
+		back(windowId);
 	});
 
 	// Forward
 	$("#window_" + windowId + " .forward_button").click(function() {
-		if(urlHistory[windowId][0] + 1 >= urlHistory[windowId].length) return;
-		$("#windows .selected .window_iframe").attr("src", urlHistory[windowId][++urlHistory[windowId][0]]);
-		urlHistory[windowId][0] = urlHistory[windowId][0];
+		forward(windowId);
 	});
 
 	// Close tab
@@ -279,9 +308,6 @@ function newTab(url) {
 		$("#windows .selected .url_input").val(url);
 		navigate(windowId);
 	}
-	if (debug) {
-		console.log("New tab " + windowId);
-	}
 }
 
 /**
@@ -296,9 +322,6 @@ function closeTab(windowId) {
 		windowId = $("#windows .selected").attr("id").substring(7);
 
 	// Remove selected window & corresponding tab
-	if (debug) {
-		console.log("Close tab " + windowId);
-	}
 	$("#window_" + windowId).remove();
 	$("#tab_" + windowId).remove();
 
@@ -328,15 +351,10 @@ function closeTab(windowId) {
 function navigate(windowId) {
 	// invoked when the user hits the go button or hits enter in url box
 	var address = url.guess($.trim($("#windows .selected .url_input").val()));
-<<<<<<< HEAD
-	// trigger navigation
-	$("#windows .selected .window_iframe").attr("src", address);
-=======
 	// trigger navigation if we have somewhere to navigate to
 	if (address) {
 		$("#windows .selected .window_iframe").attr("src", address);
 	}
->>>>>>> 21c8382e00b6d160774c5bd895ed0cb531cd40c1
 }
 
 /**
@@ -420,6 +438,21 @@ function activateWindows() {
 }
 
 /**
+ * Get Window ID
+ *
+ * Get the ID of the currently selected window
+ *
+ * @return ID String excluding "window_" prefix
+ */
+function getCurrentWindowId() {
+	if($("#windows").hasClass("active")) {
+		return $("#windows .selected").attr("id").substring(7);
+	} else {
+		return false;
+	}
+}
+
+/**
  * Register Keyboard Shortcuts
  *
  * Registers keyboard shortcuts for new tab, close tab and location bar focus
@@ -446,7 +479,32 @@ function registerKeyboardShortcuts() {
 		}
 	});
 
-<<<<<<< HEAD
+	// Refresh
+	hotkey.register("accel-r", function(){
+		if($("#windows").hasClass("active")) {
+			navigate();
+		}
+	});
+
+	// Back
+	hotkey.register("accel-vk_left", function() {
+		if($("#windows").hasClass("active")) {
+			back(getCurrentWindowId());
+		}
+	});
+
+	// Forward
+	hotkey.register("accel-vk_right", function() {
+		if($("#windows").hasClass("active")) {
+			forward(getCurrentWindowId());
+		}
+	});
+
+	// Shutdown
+	hotkey.register("accel-q", function(){
+		window.exit();
+	});
+
 	// Navigation
 	hotkey.register("accel-0", function(){
 		activateHomeScreen();
@@ -479,14 +537,7 @@ function registerKeyboardShortcuts() {
 		if($(".window").length >= 5) {
 			var tab = $(".tab").eq(4);
 			selectTab(tab.attr("id").substring(4));
-=======
-	// Refresh
-	hotkey.register("accel-r", function(){
-		if($("#windows").hasClass("active")) {
-			navigate();
->>>>>>> 21c8382e00b6d160774c5bd895ed0cb531cd40c1
-		}
-	});
+
 	hotkey.register("accel-6", function(){
 		if($(".window").length >= 6) {
 			var tab = $(".tab").eq(5);
