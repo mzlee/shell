@@ -27,7 +27,6 @@ web_content = require("web-content"),
 url = require("url"),
 fullscreen = require("fullscreen"),
 urlHistory = [], // History of URLs
-currentUrlIndex = 0, // Index of current point in URL history
 clockElement,
 selectedDownTab,
 enteredTab;
@@ -97,7 +96,7 @@ function registerWindowEventListeners(windowId) {
 
 	// When URL input box is de-selected and URL un-changed, change "Go" button back to "Refresh" button and set to loaded state
 	url_input.focusout(function() {
-		if (url_input.val() == urlHistory[currentUrlIndex]) {
+		if (url_input.val() == urlHistory[windowId][urlHistory[windowId][0]]) {
 			url_input.addClass('loaded');
 			go_button.attr("src", "refresh.png");
 		}
@@ -115,8 +114,15 @@ function registerWindowEventListeners(windowId) {
 			web_content.stopload(window_iframe);
 			$(go_button).attr("src", "refresh.png");
 		} else {
-			// otherwise act as go/refresh
-			navigate($(this).parents(".window").attr("id").substring(7));
+			if (!url_input.val()) {
+				// The user has hit Go without a URL, so refocus url_input
+				// TODO: samwwwblack; this causes a minor flicker as url_input
+				// loses then regains focus. Ideas to fix this?
+				url_input.focus();
+			} else {
+				// otherwise act as go/refresh
+				navigate($(this).parents(".window").attr("id").substring(7));
+			}
 		}
 	});
 
@@ -157,11 +163,13 @@ function attachIframeProgressMonitor(windowId) {
 
 	// Check progress of page load...
 	progressMonitor.on('progress', function(percent) {
-		$(url_input).addClass('loading');
-		$(url_input).css({
-			'-moz-background-size': percent+"%",
-			'background-size': percent+"%"
-		});
+		if ($(url_input).val()) {
+			$(url_input).addClass('loading');
+			$(url_input).css({
+				'-moz-background-size': percent+"%",
+				'background-size': percent+"%"
+			});
+		}
 	});
 
 	// When page starts to load...
@@ -189,17 +197,22 @@ function attachIframeProgressMonitor(windowId) {
 
 	// When page and contents are completely loaded...
 	progressMonitor.on('load-stop', function() {
-		// Set URL input textbox to loaded state
-		$(url_input).removeClass('loading').addClass('loaded');
-		// Change "Go" button to "Refresh"
-		$('#window_' + windowId + ' .go_button').attr("src", "refresh.png");
-		// Update favicon
-		faviconUpdate(windowId);
-		// Check for background-color
-		if(window_iframe.css('background-color') === 'transparent'){
-			window_iframe.css('background-color', 'white');
+		if ($(url_input).val()) {
+			// Set URL input textbox to loaded state
+			$(url_input).removeClass('loading').addClass('loaded');
+			// Change "Go" button to "Refresh"
+			$('#window_' + windowId + ' .go_button').attr("src", "refresh.png");
+			// Update favicon
+			faviconUpdate(windowId);
+			// Check for background-color
+			if(window_iframe.css('background-color') === 'transparent'){
+				window_iframe.css('background-color', 'white');
+			}
+			// And focus on the iFrame
+			window_iframe.focus();
 		}
 	});
+
 
 	// When title changes...
 	progressMonitor.on('title-change', function(document_title) {
@@ -207,15 +220,6 @@ function attachIframeProgressMonitor(windowId) {
 			$('#window_' + windowId + ' .document_title').addClass("active").text(document_title);
 		}
 	});
-}
-
-/**
- * Selected Id
- *
- * Should return the window id of the currently selected tab
- */
-function selectedId() {
-	return $("#windows .selected").attr("id").substring(7);
 }
 
 /**
@@ -324,8 +328,15 @@ function closeTab(windowId) {
 function navigate(windowId) {
 	// invoked when the user hits the go button or hits enter in url box
 	var address = url.guess($.trim($("#windows .selected .url_input").val()));
+<<<<<<< HEAD
 	// trigger navigation
 	$("#windows .selected .window_iframe").attr("src", address);
+=======
+	// trigger navigation if we have somewhere to navigate to
+	if (address) {
+		$("#windows .selected .window_iframe").attr("src", address);
+	}
+>>>>>>> 21c8382e00b6d160774c5bd895ed0cb531cd40c1
 }
 
 /**
@@ -435,6 +446,7 @@ function registerKeyboardShortcuts() {
 		}
 	});
 
+<<<<<<< HEAD
 	// Navigation
 	hotkey.register("accel-0", function(){
 		activateHomeScreen();
@@ -467,6 +479,12 @@ function registerKeyboardShortcuts() {
 		if($(".window").length >= 5) {
 			var tab = $(".tab").eq(4);
 			selectTab(tab.attr("id").substring(4));
+=======
+	// Refresh
+	hotkey.register("accel-r", function(){
+		if($("#windows").hasClass("active")) {
+			navigate();
+>>>>>>> 21c8382e00b6d160774c5bd895ed0cb531cd40c1
 		}
 	});
 	hotkey.register("accel-6", function(){
